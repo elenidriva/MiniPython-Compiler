@@ -1,0 +1,94 @@
+Package minipython;
+
+Helpers
+	digit = ['0' .. '9'];
+	letter = ['a' .. 'z']|['A' .. 'Z']; 
+	cr = 13; 
+	lf = 10;
+	all = [0..127]; 
+	eol = lf | cr | cr lf ;
+	not_eol = [all - [cr + lf]]; 
+
+Tokens
+	tab = 9;
+	plus = '+';
+	minus = '-';
+	mult = '*';
+	dmult = '**';
+	div = '/';
+	mod = '%';
+	plus_eq = '+=';
+	min_eq = '-=';
+	mul_eq = '*=';
+	div_eq = '/=';	
+	plus_plus = '++';
+	minus_minus = '--';
+	eq = '=';
+	logic_equal = '==';
+	n_eq = '!=';
+	exclam = '!';
+	less = '<';
+	greater = '>';
+	less_eq = '<=';
+	greater_eq = '>=';
+	true = 'true';
+	false = 'false';
+	log_and = 'and';
+	log_or = 'or';
+	log_not = 'not';
+	dictt = 'dict';
+	def = 'def';
+	logic_plus = '&&';
+	l_par = '(';
+	r_par = ')';
+	l_br = '[';
+	r_br = ']';
+	comma = ',';
+	qmark = '?';
+	gqmark = ';';
+	if = 'if';
+	elif = 'elif';
+	else = 'else';
+	while = 'while';
+	for = 'for';
+	print = 'print';
+	return = 'return';
+	assert = 'assert';
+	semi = ':';
+	quote = '"';
+	blank = (' ' | lf | cr);
+	line_comment = '#' not_eol* eol; 
+	number = digit+ | (digit+ '.' digit+);
+	id = letter (letter | digit)*;
+	string = '"'not_eol* '"';
+
+Ignored Tokens
+	blank, line_comment;
+	
+Productions
+	programme = commands*;
+	
+	commands ={stat} statement|
+				 {expr}expression;
+	
+	statement ={if}tab* if  comparison semi statement |
+				  {assign}tab* id eq expression |
+				  {print}tab* print expression;
+	
+	comparison = {true} true|
+					 {false} false|
+					 {lessc} [lpar]:expression less [rpar]:expression|
+					 {greatc}[lpar]:expression greater [rpar]:expression;
+					 
+	expression = {multiplication} multiplication |
+					{addition} expression plus multiplication|
+					{subtraction} expression minus multiplication;
+					
+	multiplication = {something} something |
+						  {multiplication} multiplication mult something;
+						  
+	something ={identifier}id|
+				  {numb}number|
+				  {par} l_par expression r_par;
+					 
+					 
