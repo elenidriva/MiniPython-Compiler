@@ -14,18 +14,18 @@ Tokens
 	plus = '+';
 	minus = '-';
 	mult = '*';
-	dmult = '**';
+	exp = '**';
 	div = '/';
 	mod = '%';
 	plus_eq = '+=';
-	min_eq = '-=';
-	mul_eq = '*=';
+	minus_eq = '-=';
+	mult_eq = '*=';
 	div_eq = '/=';	
 	plus_plus = '++';
 	minus_minus = '--';
-	eq = '=';
+	equal = '=';
 	logic_equal = '==';
-	n_eq = '!=';
+	not_equal = '!=';
 	exclam = '!';
 	less = '<';
 	greater = '>';
@@ -33,9 +33,9 @@ Tokens
 	greater_eq = '>=';
 	true = 'true';
 	false = 'false';
-	log_and = 'and';
-	log_or = 'or';
-	log_not = 'not';
+	and = 'and';
+	or = 'or';
+	not = 'not';
 	dictt = 'dict';
 	def = 'def';
 	logic_plus = '&&';
@@ -51,10 +51,12 @@ Tokens
 	else = 'else';
 	while = 'while';
 	for = 'for';
+	in = 'in';
 	print = 'print';
 	return = 'return';
 	assert = 'assert';
 	semi = ':';
+	dot = '.';
 	quote = '"';
 	blank = (' ' | lf | cr);
 	line_comment = '#' not_eol* eol; 
@@ -68,27 +70,62 @@ Ignored Tokens
 Productions
 	programme = commands*;
 	
-	commands ={stat} statement|
-				 {expr}expression;
+	commands =	 {stat} statement|
+				 {func} function;
+
+	function =  def id l_par argument? r_par semi statement;
 	
-	statement ={if}tab* if  comparison semi statement |
-				  {assign}tab* id eq expression |
-				  {print}tab* print expression;
+	equal_value = equal value;
 	
-	comparison = {true} true|
+	comma_id_equal_value = comma id equal_value?;
+	
+	argument =	id equal_value? comma_id_equal_value*;
+	
+	statement =	 {if} tab* if  comparison semi statement |
+				 {for} tab* for [id1] :id in [id2] :id semi statement |
+				 {while} tab* while comparison semi statement |
+				 {assign} tab* id equal expression |
+				 {plus_eq} tab* id plus_eq expression |
+				 {minus_eq} tab* id minus_eq expression |
+				 {mult_eq} tab* id mult_eq expression |
+				 {div_eq} tab* id div_eq expression |
+				 {print} tab* print expression comma_expression* |
+				 {function_call1} tab* function_call |
+				 {list_decl} tab* id equal l_br  value comma_value* r_br |
+				 {list_assign} tab* id l_br [list1]: expression r_br equal [list2]: expression;
+				 			 
+	value = 	{number} number |
+				{string} string |
+				{function_call2} id dot function_call;
+			
+	comma_value = comma value;
+	
+	comma_expression = comma expression;
+	
+	function_call = id l_par arg_list? r_par;
+	
+	arg_list = expression comma_expression*;
+	
+	
+	comparison = 	 {true} true|
 					 {false} false|
-					 {lessc} [lpar]:expression less [rpar]:expression|
-					 {greatc}[lpar]:expression greater [rpar]:expression;
+					 {lessc} [lpar1]:expression less [rpar1]:expression|
+					 {greatc}[lpar2]:expression greater [rpar2]:expression;
 					 
-	expression = {multiplication} multiplication |
+	expression = {multi} multiplication |
 					{addition} expression plus multiplication|
 					{subtraction} expression minus multiplication;
 					
-	multiplication = {something} something |
-						  {multiplication} multiplication mult something;
+	multiplication = {pow} power |
+						  {mult} multiplication mult power |
+						  {div} multiplication div power;
 						  
-	something ={identifier}id|
-				  {numb}number|
-				  {par} l_par expression r_par;
+	power = {smth} something |
+			{power} power exp something;
+			
+	something =	  {identifier} id |
+				  {val} value|
+				  {par} l_par expression r_par |
+				  {function_call2} function_call;
 					 
 					 
