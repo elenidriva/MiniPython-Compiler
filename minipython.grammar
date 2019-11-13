@@ -62,7 +62,7 @@ Tokens
 	line_comment = '#' not_eol* eol; 
 	number = ('-')? digit+ | ('-')? (digit+ '.' digit+);
 	id = letter (letter | digit)*;
-	string = '"'not_eol* '"';
+	string = '"'not_eol* '"' | '''not_eol* ''';
 
 Ignored Tokens
 	blank, line_comment;
@@ -93,7 +93,8 @@ Productions
 				 {function_call1} tab* function_call |
 				 {return} tab* return expression |
 				 {list_decl} tab* id equal l_br  value comma_value* r_br |
-				 {list_assign} tab* id l_br [list1]: expression r_br equal [list2]: expression;
+				 {list_assign} tab* id l_br [list1]: expression r_br equal [list2]: expression |
+				 {assert} assert expression comma_expression?;
 				 			 
 	value = 	{number} number |
 				{string} string |
@@ -110,12 +111,24 @@ Productions
 	
 	comparison = 	 {true} true|
 					 {false} false|
-					 {lessc} [lpar1]:expression less [rpar1]:expression|
-					 {greatc}[lpar2]:expression greater [rpar2]:expression;
+					 {lessc} [lpar1]:expression less [rpar1]:expression |
+					 {greatc}[lpar2]:expression greater [rpar2]:expression |
+					 {equals} [eq1]:expression logic_equal [eq2]:expression |
+					 {not_equal} [n_eq1]:expression not_equal [n_eq2]:expression |
+					 {less_eq} [l_eq1]:expression less_eq [l_eq2]:expression |
+					 {greater_eq} [gr_eq1]:expression greater_eq [gr_eq2]:expression
+					 {and} [and1]:comparison and [and2]:comparison |
+					 {or} [or1]:comparison and [or2]:comparison | 
+					 {not} not comparison;
 					 
-	expression = {multi} multiplication |
+			 
+					 
+	expression = 	{multi} multiplication |
 					{addition} expression plus multiplication|
-					{subtraction} expression minus multiplication;
+					{subtraction} expression minus multiplication |
+					{incr_decr} increment_decrement;
+					
+					
 					
 	multiplication = {pow} power |
 						  {mult} multiplication mult power |
@@ -123,10 +136,20 @@ Productions
 						  
 	power = {smth} something |
 			{power} power exp something;
+	
+	increment_decrement = {pre_increment} plus_plus pre_post_operand
+						  {pre_decrement} minus_minus pre_post_operand
+						  {postfix} postfix;
+	
+	postfix = {post_increment} pre_post_operand plus_plus;
+			  {post_decrement} pre_post_operand minus_minus;
+			  
+	pre_post_operand = 	{value} id l_br expression r_br |
+						{id} id;
 			
 	something =	  {identifier} id |
 				  {val} value|
 				  {par} l_par expression r_par |
 				  {function_call2} function_call;
 					 
-					 
+					 remainder
