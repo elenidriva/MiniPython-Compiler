@@ -60,7 +60,7 @@ Tokens
 	quote = '"';
 	blank = (' ' | lf | cr);
 	line_comment = '#' not_eol* eol; 
-	number = digit+ | (digit+ '.' digit+);
+	number = ('-')? digit+ | ('-')? (digit+ '.' digit+);
 	id = letter (letter | digit)*;
 	string = '"'not_eol* '"';
 
@@ -91,6 +91,7 @@ Productions
 				 {div_eq} tab* id div_eq expression |
 				 {print} tab* print expression comma_expression* |
 				 {function_call1} tab* function_call |
+				 {return} tab* return expression |
 				 {list_decl} tab* id equal l_br  value comma_value* r_br |
 				 {list_assign} tab* id l_br [list1]: expression r_br equal [list2]: expression;
 				 			 
