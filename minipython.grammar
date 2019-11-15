@@ -109,47 +109,49 @@ Productions
 	arg_list = expression comma_expression*;
 	
 	
-	comparison = 	 {true} true|
-					 {false} false|
-					 {lessc} [lpar1]:expression less [rpar1]:expression |
+	comparison =	 {lessc} [lpar1]:expression less [rpar1]:expression |
 					 {greatc}[lpar2]:expression greater [rpar2]:expression |
 					 {equals} [eq1]:expression logic_equal [eq2]:expression |
 					 {not_equal} [n_eq1]:expression not_equal [n_eq2]:expression |
 					 {less_eq} [l_eq1]:expression less_eq [l_eq2]:expression |
-					 {greater_eq} [gr_eq1]:expression greater_eq [gr_eq2]:expression
-					 {and} [and1]:comparison and [and2]:comparison |
-					 {or} [or1]:comparison and [or2]:comparison | 
-					 {not} not comparison;
+					 {greater_eq} [gr_eq1]:expression greater_eq [gr_eq2]:expression |
+					 {and_or_not} and_or_not;
 					 
-			 
+	and_or_not = {and_not_or_value} rel_val |
+				 {and} and_or_not and rel_val | 
+				 {or} and_or_not or rel_val | 
+				 {not} not rel_val;
+	
+	rel_val = {smth} something |
+			  {true} true |
+			  {false} false;
 					 
 	expression = 	{multi} multiplication |
 					{addition} expression plus multiplication|
 					{subtraction} expression minus multiplication |
 					{incr_decr} increment_decrement;
-					
+						
 					
 					
 	multiplication = {pow} power |
 						  {mult} multiplication mult power |
-						  {div} multiplication div power;
+						  {div} multiplication div power |
+						  {remainder} multiplication mod power;
 						  
 	power = {smth} something |
 			{power} power exp something;
 	
-	increment_decrement = {pre_increment} plus_plus pre_post_operand
-						  {pre_decrement} minus_minus pre_post_operand
+	increment_decrement = {pre_increment} plus_plus pre_post_operand |
+						  {pre_decrement} minus_minus pre_post_operand |
 						  {postfix} postfix;
 	
-	postfix = {post_increment} pre_post_operand plus_plus;
+	postfix = {post_increment} pre_post_operand plus_plus |
 			  {post_decrement} pre_post_operand minus_minus;
 			  
 	pre_post_operand = 	{value} id l_br expression r_br |
-						{id} id;
+						{id} id;			
 			
 	something =	  {identifier} id |
 				  {val} value|
 				  {par} l_par expression r_par |
 				  {function_call2} function_call;
-					 
-					 remainder
