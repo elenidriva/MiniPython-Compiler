@@ -57,6 +57,7 @@ Tokens
 	assert = 'assert';
 	semi = ':';
 	dot = '.';
+	none = 'None';
 	quote = '"';
 	blank = (' ' | lf | cr);
 	line_comment = '#' not_eol* eol; 
@@ -92,13 +93,13 @@ Productions
 				 {print} tab* print expression comma_expression* |
 				 {function_call1} tab* function_call |
 				 {return} tab* return expression |
-				 {list_decl} tab* id equal l_br  value comma_value* r_br |
 				 {list_assign} tab* id l_br [list1]: expression r_br equal [list2]: expression |
 				 {assert} assert expression comma_expression?;
 				 			 
 	value = 	{number} number |
 				{string} string |
-				{function_call2} id dot function_call;
+				{function_call2} id dot function_call |
+				{none} none;
 			
 	comma_value = comma value;
 	
@@ -108,38 +109,20 @@ Productions
 	
 	arg_list = expression comma_expression*;
 	
-	
-	comparison =	 {lessc} [lpar1]:expression less [rpar1]:expression |
-					 {greatc}[lpar2]:expression greater [rpar2]:expression |
-					 {equals} [eq1]:expression logic_equal [eq2]:expression |
-					 {not_equal} [n_eq1]:expression not_equal [n_eq2]:expression |
-					 {less_eq} [l_eq1]:expression less_eq [l_eq2]:expression |
-					 {greater_eq} [gr_eq1]:expression greater_eq [gr_eq2]:expression |
-					 {and_or_not} and_or_not;
-					 
-	and_or_not = {and_not_or_value} rel_val |
-				 {and} and_or_not and rel_val | 
-				 {or} and_or_not or rel_val | 
-				 {not} not rel_val;
-	
-	rel_val = {smth} something |
-			  {true} true |
-			  {false} false;
-					 
+
 	expression = 	{multi} multiplication |
 					{addition} expression plus multiplication|
 					{subtraction} expression minus multiplication |
 					{incr_decr} increment_decrement;
-						
+									
 					
-					
-	multiplication = {pow} power |
+	multiplication = 	  {pow} power |
 						  {mult} multiplication mult power |
 						  {div} multiplication div power |
 						  {remainder} multiplication mod power;
 						  
-	power = {smth} something |
-			{power} power exp something;
+	power = 			{smth} something |
+						{power} power exp something;
 	
 	increment_decrement = {pre_increment} plus_plus pre_post_operand |
 						  {pre_decrement} minus_minus pre_post_operand |
@@ -148,10 +131,31 @@ Productions
 	postfix = {post_increment} pre_post_operand plus_plus |
 			  {post_decrement} pre_post_operand minus_minus;
 			  
-	pre_post_operand = 	{value} id l_br expression r_br |
-						{id} id;			
-			
-	something =	  {identifier} id |
-				  {val} value|
-				  {par} l_par expression r_par |
-				  {function_call2} function_call;
+	pre_post_operand = 	{smthhh} something;	
+	
+	comparison =	{lessc} [lpar1]:expression less [rpar1]:expression |
+					{greatc}[lpar2]:expression greater [rpar2]:expression |
+				    {equals} [eq1]:expression logic_equal [eq2]:expression |
+					{not_equal} [n_eq1]:expression not_equal [n_eq2]:expression |
+					{less_eq} [l_eq1]:expression less_eq [l_eq2]:expression |
+					{greater_eq} [gr_eq1]:expression greater_eq [gr_eq2]:expression |
+					{and_or_not} and_or_not;
+					 
+	and_or_not = 	{and_not_or_value} rel_val |
+					{and} and_or_not and rel_val | 
+					{or} and_or_not or rel_val | 
+					{not} not rel_val;
+	
+	rel_val = 		{smth} par_comp |
+					{true} true |
+					{false} false;
+					 					
+	par_comp = {par_comp} l_par comparison r_par;	
+		
+	something =	   {identifier_br} id l_br expression r_br |
+				   {identifier} id |
+				   {val} value|
+				   {par} l_par expression r_par |
+				   {brack} l_br value comma_value* r_br |
+				   {function_call2} function_call;
+				   
