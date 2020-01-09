@@ -1,0 +1,221 @@
+/*
+Δρίβα Ελένη (3140047)
+Καμπουρίδης Θεοχάρης (3140313)
+Ρίζος Κωνσταντίνος (3110172)
+ */
+Package minipython;
+
+Helpers
+	digit = ['0' .. '9'];
+	letter = ['a' .. 'z']|['A' .. 'Z']; 
+	cr = 13; 
+	lf = 10;
+	all = [0..127]; 
+	eol = lf | cr | cr lf ;
+	not_eol = [all - [cr + lf]]; 
+
+Tokens
+	tab = 9;
+	plus = '+';
+	minus = '-';
+	mult = '*';
+	exp = '**';
+	div = '/';
+	mod = '%';
+	plus_eq = '+=';
+	minus_eq = '-=';
+	mult_eq = '*=';
+	div_eq = '/=';	
+	plus_plus = '++';
+	minus_minus = '--';
+	equal = '=';
+	logic_equal = '==';
+	not_equal = '!=';
+	exclam = '!';
+	less = '<';
+	greater = '>';
+	less_eq = '<=';
+	greater_eq = '>=';
+	true = 'true';
+	false = 'false';
+	and = 'and';
+	or = 'or';
+	not = 'not';
+	dictt = 'dict';
+	def = 'def';
+	logic_plus = '&&';
+	l_par = '(';
+	r_par = ')';
+	l_br = '[';
+	r_br = ']';
+	comma = ',';
+	qmark = '?';
+	gqmark = ';';
+	if = 'if';
+	elif = 'elif';
+	else = 'else';
+	while = 'while';
+	for = 'for';
+	in = 'in';
+	print = 'print';
+	return = 'return';
+	assert = 'assert';
+	semi = ':';
+	dot = '.';
+	none = 'None';
+	quote = '"';
+	blank = (' ' | lf | cr);
+	line_comment = '#' not_eol* eol; 
+	number = digit+ |(digit+ '.' digit+);
+	id = letter (letter | digit)*;
+	string = '"'not_eol* '"' | '''not_eol* ''';
+
+Ignored Tokens
+	blank, line_comment;
+	
+Productions
+	programme =  commands* {->New programme([commands])};
+	
+	commands =	 {statement} statement{->New commands.statement(statement)}|
+				 {function} function {->New commands.function(function)};
+
+	function =  def id l_par argument? r_par semi statement{->New function(id,[argument], statement)};
+	
+	equal_value{->argument} = {equal_value}equal value{->value};
+	
+	comma_id_equal_value{->id_value} =  comma id equal_value? {->New id_value(id, [equal_value.value])};
+	
+	argument =	{argument} id equal_value? comma_id_equal_value*{->New argument(id,[equal_value.value],[comma_id_equal_value.id_value])};
+
+	statement =	 {if} tab* if  comparison semi statement{->New statement.if(comparison, statement)} |
+				 {for} tab* for [id1] :id in [id2] :id semi statement{->New statement.for(id1, id2, statement)} |
+				 {while} tab* while comparison semi statement{->New statement.while(comparison, statement)} |
+				 {assign} tab* id equal expression{->New statement.assign(id, expression)} |
+				 {plus_eq} tab* id plus_eq expression{->New statement.plus_eq(id, statement)} |
+				 {minus_eq} tab* id minus_eq expression{->New statement.minus_eq(id, statement)} |
+				 {mult_eq} tab* id mult_eq expression{->New statement.mult_eq(id, statement)} |
+				 {div_eq} tab* id div_eq expression{->New statement.div_eq(id, statement)} |
+				 {print} tab* print expression comma_expression*{->New statement.print(expression, [comma_expression.expression])} |
+				 {function_call} tab* function_call{->New statement.function_call(function_call)} |
+				 {return} tab* return expression{->New statement.return(expression)} |
+				 {list_assign} tab* id l_br [list1]: expression r_br equal [list2]: expression{->New statement.list_assign(id, list1, list2)}  |
+				 {assert} assert expression comma_expression?{->New statement.assert(expression, comma_expression.expression)};
+				 			 
+	value = 	{number} number{-> New value.number(number)} |
+				{string} string{-> New value.string(string)} |
+				{function_call2} id dot function_call{-> New value.function_call2(id,function_call)} |
+				{none} none{-> New value.none(none)};
+
+	comma_value{->value} = {comma_value} comma value{-> value};
+	
+	comma_expression{->expression} = {comma_expression} comma expression{->expression};
+	
+	function_call = {function_call} id l_par arg_list? r_par{->New function_call(id, arg_list)};
+	
+	arg_list = {arg_list} expression comma_expression*{->New arg_list(expression, [comma_expression.expression])};
+	
+
+	expression = 	{multiplication} multiplication{->multiplication.expression} |
+					{addition} expression plus multiplication{->New expression.addition(expression,multiplication.expression)}|
+					{subtraction} expression minus multiplication{->New expression.substraction(expression, multiplication.expression)} |
+					{incr_decr} increment_decrement{->incr_decr.expression};
+									
+					
+	multiplication{->expression} = 	  	{power} power{->power.expression} |
+										{mult} multiplication mult power{->New expression.mult(multiplication.expression, power.expression)}  |
+										{div} multiplication div power{->New expression.div(multiplication.expression, power.expression)} |
+										{remainder} multiplication mod power{->New expression.remainder(multiplication.expression, power.expression)};
+						  
+	power{->expression} = 	{smth} something{->smth.expression} |
+							{power} power exp something{-> New expression.power(power.expression, something.expression)};
+	
+	increment_decrement{->expression} = {pre_increment} plus_plus pre_post_operand{->pre_post_operand.expression} |
+										{pre_decrement} minus_minus pre_post_operand{->pre_post_operand.expression} |
+										{postfix} postfix{->postfix.expression};
+	
+	postfix{->expression} = {post_increment} pre_post_operand plus_plus{->pre_post_operand.expression} |
+			  {post_decrement} pre_post_operand minus_minus{->pre_post_operand.expression};
+			  
+	pre_post_operand{->expression} = 	{smthhh} something{-> New expression.smthhh(something)};	
+	
+				 
+	and_or_not{->comparison} = 	{and_or_not_value} not_and_prio{->and_or_not_value.comparison} |
+								{or} and_or_not or not_and_prio{->New comparison.or(and_or_not, not_and_prio.comparison)} ;
+              
+	not_and_prio{->comparison} = 	{not_and_prio_value} not_prio{->not_and_prio_value.comparison} |
+									{and} not_and_prio and not_prio{->New comparison.and(not_and_prio, not_prio.comparison)} ;
+				
+	not_prio{->comparison} = 	{rel_val} rel_val{->rel_val.comparison} |
+								{not_prio_value} not rel_val{->New comparison.not_prio_value(rel_val)}; 
+
+	rel_val{->comparison} = 	{smth} par_comp{->smth.comparison} |
+								{true} true{->New comparison.true()} |
+								{false} false{->New comparison.true()}; 
+					 					
+	par_comp{->comparison} = 	{par_comp} l_par comparison r_par{->comparison};	
+		
+	something{->expression} =	{id_br} id l_br expression r_br{->New expression.id_br(id, expression)} |
+								{identifier} id{->New expression.identifier(id)} |
+								{val} value{->New expression.val(value)}|
+								{par} l_par expression r_par{->New expression.par(expression)} |
+								{brack} l_br value comma_value* r_br{->New expression.brack(value, [comma_value.value])} |
+								{function_call2} function_call{->New expression.function_call2(function_call)};
+				   
+	comparison =	{lessc} [lpar1]:expression less [rpar1]:expression{-> New comparison.lessc(lpar1, rpar1)} |
+					{greatc}[lpar2]:expression greater [rpar2]:expression{-> New comparison.greatc(lpar2, rpar2)} |
+				    {equals} [eq1]:expression logic_equal [eq2]:expression{-> New comparison.equals(eq1, eq2)} |
+					{not_equal} [n_eq1]:expression not_equal [n_eq2]:expression{-> New comparison.not_equal(n_eq1, n_eq2)} |
+					{less_eq} [l_eq1]:expression less_eq [l_eq2]:expression{-> New comparison.less_eq(l_eq1, l_eq2)} |
+					{greater_eq} [gr_eq1]:expression greater_eq [gr_eq2]:expression{-> New comparison.greater_eq(gr_eq1, gr_eq2)} |
+					{and_or_not} and_or_not{->and_or_not.comparison};	
+
+				
+Abstract Syntax Tree
+	programme = commands*;
+	
+	commands =	 {statement} statement|
+				 {function} function;
+
+	function =  def id l_par argument? r_par semi statement;	
+	
+	argument =	id equal_value? comma_id_equal_value*;	
+	
+	id_value = id value*;
+	
+	statement =	 {if} tab* if  comparison semi statement |
+				 {for} tab* for [id1] :id in [id2] :id semi statement |
+				 {while} tab* while comparison semi statement |
+				 {assign} tab* id equal expression |
+				 {plus_eq} tab* id plus_eq expression |
+				 {minus_eq} tab* id minus_eq expression |
+				 {mult_eq} tab* id mult_eq expression |
+				 {div_eq} tab* id div_eq expression |
+				 {print} tab* print expression comma_expression* |
+				 {function_call1} tab* function_call |
+				 {return} tab* return expression |
+				 {list_assign} tab* id l_br [list1]: expression r_br equal [list2]: expression |
+				 {assert} assert expression comma_expression?;
+				 			 
+	value = 	{number} number |
+				{string} string |
+				{function_call2} id dot function_call |
+				{none} none;
+				
+	function_call = id l_par arg_list? r_par;
+	
+	arg_list = expression comma_expression*;
+	
+
+	expression = 	{multiplication} multiplication |
+					{addition} expression plus multiplication|
+					{subtraction} expression minus multiplication |
+					{incr_decr} increment_decrement;
+
+	comparison =	{lessc} [lpar1]:expression less [rpar1]:expression |
+					{greatc}[lpar2]:expression greater [rpar2]:expression |
+				    {equals} [eq1]:expression logic_equal [eq2]:expression |
+					{not_equal} [n_eq1]:expression not_equal [n_eq2]:expression |
+					{less_eq} [l_eq1]:expression less_eq [l_eq2]:expression |
+					{greater_eq} [gr_eq1]:expression greater_eq [gr_eq2]:expression |
+					{and_or_not} and_or_not;
+				
