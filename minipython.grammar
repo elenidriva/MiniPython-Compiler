@@ -1,3 +1,8 @@
+/*
+Δρίβα Ελένη (3140047)
+Καμπουρίδης Θεοχάρης (3140313)
+Ρίζος Κωνσταντίνος (3110172)
+ */
 Package minipython;
 
 Helpers
@@ -61,7 +66,7 @@ Tokens
 	quote = '"';
 	blank = (' ' | lf | cr);
 	line_comment = '#' not_eol* eol; 
-	number = ('-')? digit+ | ('-')? (digit+ '.' digit+);
+	number = digit+ |(digit+ '.' digit+);
 	id = letter (letter | digit)*;
 	string = '"'not_eol* '"' | '''not_eol* ''';
 
@@ -133,22 +138,19 @@ Productions
 			  
 	pre_post_operand = 	{smthhh} something;	
 	
-	comparison =	{lessc} [lpar1]:expression less [rpar1]:expression |
-					{greatc}[lpar2]:expression greater [rpar2]:expression |
-				    {equals} [eq1]:expression logic_equal [eq2]:expression |
-					{not_equal} [n_eq1]:expression not_equal [n_eq2]:expression |
-					{less_eq} [l_eq1]:expression less_eq [l_eq2]:expression |
-					{greater_eq} [gr_eq1]:expression greater_eq [gr_eq2]:expression |
-					{and_or_not} and_or_not;
-					 
-	and_or_not = 	{and_not_or_value} rel_val |
-					{and} and_or_not and rel_val | 
-					{or} and_or_not or rel_val | 
-					{not} not rel_val;
-	
+				 
+	and_or_not = 	{and_or_not_value} not_and_prio |
+					{or} and_or_not or not_and_prio;
+              
+	not_and_prio = 	{not_and_prio_value} not_prio |
+					{and} not_and_prio and not_prio;
+				
+	not_prio = 		{rel_val} rel_val |
+					{not_prio_value} not rel_val; 
+
 	rel_val = 		{smth} par_comp |
 					{true} true |
-					{false} false;
+					{false} false; 
 					 					
 	par_comp = {par_comp} l_par comparison r_par;	
 		
@@ -159,3 +161,11 @@ Productions
 				   {brack} l_br value comma_value* r_br |
 				   {function_call2} function_call;
 				   
+	comparison =	{lessc} [lpar1]:expression less [rpar1]:expression |
+					{greatc}[lpar2]:expression greater [rpar2]:expression |
+				    {equals} [eq1]:expression logic_equal [eq2]:expression |
+					{not_equal} [n_eq1]:expression not_equal [n_eq2]:expression |
+					{less_eq} [l_eq1]:expression less_eq [l_eq2]:expression |
+					{greater_eq} [gr_eq1]:expression greater_eq [gr_eq2]:expression |
+					{and_or_not} and_or_not;					
+						

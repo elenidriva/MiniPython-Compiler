@@ -14,8 +14,9 @@ if str("Eleni") != b:
 def add(a,b):
     return a+b
 x = 0
-if true and (not false) or false:
-        print x
 
-if ((add(1,2))-- != 3) and (x<1):
+if not false and (true and false) or false:
+        print x
+        
+if ((add(1,2))-- != 3) and (not (x<1)):
         print "haha"
